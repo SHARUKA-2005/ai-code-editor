@@ -11,23 +11,32 @@ const DEFAULT_CODE = `// Welcome to AI Code Editor! ✨
 // Write or paste your code here, then click "Review" to get AI feedback.
 
 function calculateFactorial(n) {
-  // Missing base case check for negative numbers
-  if (n == 0) return 1;
-  
-  var result = 1;
-  for (var i = 1; i <= n; i++) {
-    result = result * i;
-  }
-  
-  return result;
+    if (n < 0) {
+        throw new Error("Factorial is not defined for negative numbers");
+    }
+    if (n === 0) return 1;
+
+    let result = 1;
+    for (let i = 1; i <= n; i++) {
+        result *= i;
+    }
+    return result;
 }
 
 // Fetch user data (no error handling)
 async function fetchUser(id) {
-  const response = await fetch('/api/users/' + id);
-  const data = response.json();
-  console.log(data);
-  return data;
+    try {
+        const response = await fetch('/api/users/' + id);
+        if (!response.ok) {
+            throw new Error("Failed to fetch user");
+        }
+        const data = await response.json();
+        console.log(data);
+        return data;
+    } catch (error) {
+        console.error("Error fetching user:", error.message);
+        return null;
+    }
 }
 
 console.log(calculateFactorial(5));
