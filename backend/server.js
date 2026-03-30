@@ -1,61 +1,38 @@
-// server.js - Main Express server for the AI Code Editor backend
-
 require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
 const Groq = require("groq-sdk");
-const axios = require("axios");
 
-const app = express();
+// ✅ REQUIRED for run
+const { exec } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+
+const app = express(); // ✅ MUST COME BEFORE app.post
+
 const PORT = process.env.PORT || 5000;
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
 
-// ─── Environment validation ───────────────────────────────────────────────────
+// ─── Groq Setup ─────────────────────────────────────────
 if (!process.env.GROQ_API_KEY) {
-  console.error("❌ Missing GROQ_API_KEY in environment variables.");
+  console.error("❌ Missing GROQ_API_KEY");
   process.exit(1);
 }
 
-// 🔥 Piston URL (from .env with fallback)
-const PISTON_URL =
-  process.env.PISTON_API_URL || "http://127.0.0.1:2000/api/v2/execute";
-
-// ─── Groq AI Setup ────────────────────────────────────────────────────────────
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-// ─── AI Review Route ──────────────────────────────────────────────────────────
+// ─── REVIEW ROUTE ───────────────────────────────────────
 app.post("/api/review", async (req, res) => {
   const { code, language = "javascript" } = req.body;
 
-  if (!code || code.trim() === "") {
-    return res.status(400).json({ error: "No code provided for review." });
+  if (!code.trim()) {
+    return res.status(400).json({ error: "No code provided." });
   }
-
-  const prompt = `
-You are an expert software engineer performing a code review.
-
-Analyze the following ${language} code and provide a constructive code review.
-
-Please cover:
-1. Bugs — any logical or runtime errors
-2. Performance — bottlenecks or inefficiencies
-3. Readability — naming, structure, clarity
-4. Best Practices — language-specific conventions and patterns
-5. Suggestions — specific improvements with brief code examples where applicable
-
-Format your response in clear sections using Markdown.
-
-Code to review:
-\`\`\`${language}
-${code}
-\`\`\`
-`.trim();
 
   try {
     const completion = await groq.chat.completions.create({
@@ -63,76 +40,72 @@ ${code}
       messages: [
         {
           role: "user",
-          content: prompt,
+          content: `Review this ${language} code:\n\n${code}`,
         },
       ],
     });
 
-    const reviewText = completion.choices[0].message.content;
+    res.json({
+      review: completion.choices[0].message.content,
+    });
 
-    res.json({ review: reviewText });
-
-  } catch (error) {
-    console.error("Groq API Error:", error.message);
-
+  } catch (err) {
     res.status(500).json({
-      error: error.message || "Failed to get review from Groq."
+      error: "Review failed",
     });
   }
 });
 
-// ─── Code Execution Route (Docker Piston) ─────────────────────────────────────
-app.post("/api/run", async (req, res) => {
+// ─── RUN CODE (LOCAL JS + PYTHON) ───────────────────────
+app.post("/api/run", (req, res) => {
   const { code, language } = req.body;
 
-  const languageMap = {
-    javascript: "javascript",
-    typescript: "typescript",
-    python: "python",
-    java: "java",
-    cpp: "cpp",
-    go: "go",
-    rust: "rust",
-  };
+  let filePath, command;
 
   try {
-    const response = await axios.post(
-      PISTON_URL,
-      {
-        language: languageMap[language] || "javascript",
-        version: "*",
-        files: [{ content: code }],
-      },
-      {
-        timeout: 15000,
+    if (language === "javascript") {
+      filePath = path.join(__dirname, "temp.js");
+      fs.writeFileSync(filePath, code);
+      command = `node ${filePath}`;
+    }
+
+    else if (language === "python") {
+      filePath = path.join(__dirname, "temp.py");
+      fs.writeFileSync(filePath, code);
+      command = `python ${filePath}`;
+    }
+
+    else {
+      return res.json({
+        output: "❌ Only JS & Python supported",
+      });
+    }
+
+    exec(command, { timeout: 5000 }, (err, stdout, stderr) => {
+      if (err) {
+        return res.json({
+          output: stderr || err.message,
+        });
       }
-    );
 
-    const result = response.data;
-
-    res.json({
-      output:
-        result.run?.output ||
-        result.run?.stderr ||
-        result.compile?.stderr ||
-        "No output",
+      res.json({
+        output: stdout || "✅ No output",
+      });
     });
 
   } catch (error) {
-    console.error("Piston Error:", error.message);
-
-    res.status(500).json({
-      output: "⚠️ Code execution failed. Please try again.",
+    res.json({
+      output: error.message,
     });
   }
 });
 
-// ─── Health Check ─────────────────────────────────────────────────────────────
+// ─── HEALTH CHECK ───────────────────────────────────────
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "AI Code Editor backend is running!" });
+  res.json({ status: "ok" });
 });
 
-// ─── Start Server ─────────────────────────────────────────────────────────────
+// ─── START SERVER ───────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`✅ Backend server running at http://localhost:${PORT}`);
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });
