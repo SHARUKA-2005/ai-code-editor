@@ -1,4 +1,4 @@
-// server.js - FINAL WORKING VERSION
+// server.js - FINAL DEPLOYABLE VERSION
 
 require("dotenv").config();
 
@@ -7,13 +7,14 @@ const cors = require("cors");
 const axios = require("axios");
 const { exec } = require("child_process");
 const fs = require("fs");
+const path = require("path");
 
-// Optional (AI review)
+// Optional Groq
 let Groq;
 try {
   Groq = require("groq-sdk");
 } catch {
-  console.log("Groq not installed, skipping AI review...");
+  console.log("Groq not installed (AI review disabled)");
 }
 
 const app = express();
@@ -24,13 +25,13 @@ app.use(cors());
 app.use(express.json());
 
 // ─────────────────────────────────────────────
-// 🔥 CONFIG
+// CONFIG
 // ─────────────────────────────────────────────
 const PISTON_URL =
   process.env.PISTON_API_URL || "http://127.0.0.1:2000/api/v2/execute";
 
 // ─────────────────────────────────────────────
-// 🤖 GROQ SETUP (OPTIONAL)
+// GROQ SETUP (OPTIONAL)
 // ─────────────────────────────────────────────
 let groq = null;
 
@@ -41,7 +42,21 @@ if (process.env.GROQ_API_KEY && Groq) {
 }
 
 // ─────────────────────────────────────────────
-// 🤖 AI REVIEW ROUTE
+// ROOT ROUTE (fix "Cannot GET /")
+// ─────────────────────────────────────────────
+app.get("/", (req, res) => {
+  res.send("🚀 AI Code Editor Backend is running!");
+});
+
+// ─────────────────────────────────────────────
+// HEALTH CHECK
+// ─────────────────────────────────────────────
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+// ─────────────────────────────────────────────
+// AI REVIEW ROUTE
 // ─────────────────────────────────────────────
 app.post("/api/review", async (req, res) => {
   const { code, language = "javascript" } = req.body;
@@ -79,6 +94,7 @@ ${code}
     });
 
   } catch (err) {
+    console.error(err.message);
     res.status(500).json({
       error: "AI review failed",
     });
@@ -86,7 +102,7 @@ ${code}
 });
 
 // ─────────────────────────────────────────────
-// 🔥 RUN CODE (MAIN FIX)
+// RUN CODE (FIXED VERSION)
 // ─────────────────────────────────────────────
 app.post("/api/run", async (req, res) => {
   const { code, language } = req.body;
@@ -95,7 +111,7 @@ app.post("/api/run", async (req, res) => {
     return res.status(400).json({ output: "No code provided" });
   }
 
-  // 🔹 STEP 1: TRY PISTON
+  // 🔹 STEP 1: TRY PISTON (if available)
   try {
     const response = await axios.post(PISTON_URL, {
       language,
@@ -111,10 +127,10 @@ app.post("/api/run", async (req, res) => {
     });
 
   } catch (err) {
-    console.log("⚠️ Piston not working → using local execution");
+    console.log("⚠️ Piston not working → switching to local execution");
   }
 
-  // 🔹 STEP 2: LOCAL EXECUTION FALLBACK
+  // 🔹 STEP 2: LOCAL EXECUTION (JS + PYTHON)
   try {
     if (language === "javascript") {
       fs.writeFileSync("temp.js", code);
@@ -138,7 +154,7 @@ app.post("/api/run", async (req, res) => {
 
     } else {
       res.json({
-        output: "⚠️ Only JavaScript & Python supported locally",
+        output: "⚠️ Only JavaScript & Python supported",
       });
     }
 
@@ -150,11 +166,17 @@ app.post("/api/run", async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// HEALTH CHECK
+// SERVE FRONTEND (FOR SINGLE DEPLOY)
 // ─────────────────────────────────────────────
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
-});
+const frontendPath = path.join(__dirname, "../frontend/dist");
+
+if (fs.existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  });
+}
 
 // ─────────────────────────────────────────────
 // START SERVER
