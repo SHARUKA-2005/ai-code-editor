@@ -709,3 +709,191 @@ body {
     display: none;
   }
 }
+/* 🔥 INPUT BOX */
+.input-box {
+  border-bottom: 1px solid var(--border);
+  background: #0c0f18;
+}
+
+.input-header {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan-dim);
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.input-textarea {
+  width: 100%;
+  height: 90px;
+  background: transparent;
+  color: var(--text-code);
+  border: none;
+  outline: none;
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  resize: none;
+}
+
+/* 🔥 TERMINAL */
+.terminal {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.terminal-header {
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal-body {
+  flex: 1;
+  padding: 14px;
+  font-family: var(--font-mono);
+  color: var(--green);
+  overflow-y: auto;
+}
+
+/* 🔥 LOADING */
+.loading-line {
+  color: orange;
+  font-size: 12px;
+  padding: 5px 10px;
+}
+body {
+  margin: 0;
+  background: #0b1220;
+  color: white;
+  font-family: "Inter", sans-serif;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+}
+
+.logo {
+  font-weight: bold;
+  color: #38bdf8;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+/* BUTTONS */
+.run-btn {
+  background: #22c55e;
+  border: none;
+  padding: 6px 12px;
+  color: black;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.review-btn {
+  background: #0ea5e9;
+  border: none;
+  padding: 6px 12px;
+  color: white;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+/* LANGUAGE */
+.language-select {
+  background: #020617;
+  color: white;
+  border: 1px solid #1e293b;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+/* MAIN */
+.main {
+  display: flex;
+  height: calc(100vh - 50px);
+}
+
+/* EDITOR */
+.editor {
+  flex: 2;
+}
+
+/* RIGHT PANEL */
+.right {
+  flex: 1;
+  border-left: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #1e293b;
+}
+
+.tabs button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.tabs .active {
+  color: #22c55e;
+  border-bottom: 2px solid #22c55e;
+}
+
+/* OUTPUT PANEL */
+.output-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* INPUT */
+.stdin {
+  border-bottom: 1px solid #1e293b;
+}
+
+.stdin textarea {
+  width: 100%;
+  height: 80px;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 10px;
+  outline: none;
+  resize: none;
+}
+
+/* OUTPUT */
+.stdout {
+  flex: 1;
+}
+
+.stdout pre {
+  padding: 10px;
+  color: #22c55e;
+  font-family: monospace;
+}
+
+/* LABEL */
+.label {
+  font-size: 12px;
+  padding: 5px 10px;
+  color: #38bdf8;
+}
