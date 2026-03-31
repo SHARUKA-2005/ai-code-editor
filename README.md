@@ -1,120 +1,180 @@
-# AI Code Editor 🤖✨
+# &lt;CodeAI /&gt; — AI-Powered Code Editor
 
-A minimal web-based code editor with **AI-powered code review** using Google Gemini.
+A sleek, browser-based code editor with integrated AI code review powered by **Groq** and live code execution for JavaScript and Python.
 
-## Tech Stack
+---
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React + Vite |
-| Editor | Monaco Editor (same as VS Code) |
-| Backend | Node.js + Express |
-| AI | Google Gemini 1.5 Flash (free tier) |
+## ✨ Features
 
-## Project Structure
+- **Monaco Editor** — the same editor that powers VS Code, with syntax highlighting for 7 languages
+- **AI Code Review** — sends your code to Groq's LLM and returns intelligent feedback instantly
+- **Live Code Execution** — runs JavaScript and Python directly on the server and streams output
+- **Multi-language Support** — JavaScript, TypeScript, Python, Java, C++, Go, Rust
+- **Tabbed Output Panel** — switch between terminal output and AI review without losing context
+
+---
+
+## 🗂 Project Structure
 
 ```
-ai-code-editor/
-├── backend/
-│   ├── server.js        ← Express server + Gemini API integration
-│   ├── .env             ← Your API key (create from .env.example)
-│   ├── .env.example     ← Template for environment variables
-│   └── package.json
-│
-└── frontend/
-    ├── src/
-    │   ├── App.jsx          ← Main layout, editor, review logic
-    │   ├── ReviewPanel.jsx  ← AI review output panel
-    │   ├── main.jsx         ← React entry point
-    │   └── index.css        ← Global styles (dark theme)
-    ├── index.html
-    ├── vite.config.js
-    └── package.json
+project/
+├── server.js          # Express backend — /api/review, /api/run, /api/health
+├── src/
+│   ├── App.jsx        # Main React component & layout
+│   ├── App.css        # All styles (dark IDE theme)
+│   └── ReviewPanel.jsx  # AI review display component
+├── .env               # Environment variables (not committed)
+├── package.json
+└── README.md
 ```
 
-## Setup Instructions
+---
 
-### 1. Get a Gemini API Key (Free)
+## ⚙️ Setup & Installation
 
-1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click **"Create API key"**
-4. Copy the key
+### Prerequisites
 
-### 2. Configure the Backend
+- Node.js v18+
+- Python 3 (for Python code execution)
+- A [Groq API key](https://console.groq.com/)
+
+### 1. Clone the repository
 
 ```bash
-# Navigate to the backend folder
-cd ai-code-editor/backend
-
-# Create your .env file from the template
-copy .env.example .env
+git clone https://github.com/your-username/codeai-editor.git
+cd codeai-editor
 ```
 
-Open `.env` and replace `your_gemini_api_key_here` with your actual key:
+### 2. Install dependencies
+
+**Backend:**
+```bash
+npm install
 ```
-GEMINI_API_KEY=AIzaSy...your_actual_key
+
+**Frontend** (if in a separate directory):
+```bash
+cd client
+npm install
+```
+
+### 3. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
 PORT=5000
 ```
 
-### 3. Install Dependencies
+> ⚠️ Never commit your `.env` file. It is already listed in `.gitignore`.
 
+### 4. Run the development server
+
+**Start backend:**
 ```bash
-# Backend
-cd ai-code-editor/backend
-npm install
-
-# Frontend
-cd ../frontend
-npm install
+node server.js
 ```
 
-### 4. Run the Project
-
-Open **two terminals**:
-
-**Terminal 1 — Backend:**
+**Start frontend** (in a separate terminal):
 ```bash
-cd ai-code-editor/backend
-npm start
-# ✅ Backend server running at http://localhost:5000
-```
-
-**Terminal 2 — Frontend:**
-```bash
-cd ai-code-editor/frontend
 npm run dev
-# → Open http://localhost:5173 in your browser
 ```
 
-## How It Works
+The app will be available at `http://localhost:5173` (Vite default) or whichever port your frontend dev server uses.
 
-1. You write/paste code in the Monaco Editor
-2. Click **"✨ Review Code"**
-3. Frontend sends `POST /api/review` with `{ code, language }` to the backend
-4. Backend crafts a detailed prompt and calls the **Gemini API**
-5. Gemini returns a markdown-formatted code review
-6. The review is rendered in the right panel with syntax highlighting
+---
 
-## Example API Request
+## 🔌 API Reference
 
-```bash
-curl -X POST http://localhost:5000/api/review \
-  -H "Content-Type: application/json" \
-  -d '{
-    "code": "function add(a, b) { return a + b }",
-    "language": "javascript"
-  }'
-```
+### `POST /api/review`
 
-**Example Response:**
+Sends code to the Groq LLM for an AI-powered review.
+
+**Request body:**
 ```json
 {
-  "review": "## Code Review\n\n### ✅ Overall\nThe function is simple and correct...\n\n### 💡 Suggestions\n- Add JSDoc comments..."
+  "code": "console.log('hello')",
+  "language": "javascript"
 }
 ```
 
-## Supported Languages
+**Response:**
+```json
+{
+  "review": "Your code looks clean. Consider adding error handling..."
+}
+```
 
-JavaScript, TypeScript, Python, Java, C++, Go, Rust, CSS, HTML
-(easily extendable in `frontend/src/App.jsx`)
+---
+
+### `POST /api/run`
+
+Executes JavaScript or Python code on the server in a sandboxed child process (5s timeout).
+
+**Request body:**
+```json
+{
+  "code": "print('hello')",
+  "language": "python"
+}
+```
+
+**Response:**
+```json
+{
+  "output": "hello\n"
+}
+```
+
+> ⚠️ Only `javascript` and `python` are supported for execution. Other languages return an error message.
+
+---
+
+### `GET /api/health`
+
+Health check endpoint.
+
+**Response:**
+```json
+{ "status": "ok" }
+```
+
+---
+
+## 🎨 Tech Stack
+
+| Layer     | Technology                          |
+|-----------|-------------------------------------|
+| Frontend  | React, Monaco Editor (`@monaco-editor/react`) |
+| HTTP      | Axios                               |
+| Backend   | Node.js, Express                    |
+| AI        | Groq SDK (`groq-sdk`)               |
+| Execution | Node.js `child_process` (exec)      |
+| Styling   | Custom CSS (JetBrains Mono + Syne)  |
+
+---
+
+## 🔒 Security Notes
+
+- Code execution runs with a **5-second timeout** to prevent infinite loops.
+- Only JavaScript and Python are supported to limit attack surface.
+- The server writes temporary files (`temp.js` / `temp.py`) to disk for execution — in production, consider running these in isolated containers (e.g., Docker) or using a service like [Piston](https://github.com/engineer-man/piston).
+- Never expose this server publicly without authentication — arbitrary code execution endpoints must be protected.
+
+---
+
+## 🚀 Deployment
+
+For production, consider:
+
+1. **Containerize execution** — wrap `exec` calls inside Docker to sandbox user code
+2. **Add rate limiting** — use `express-rate-limit` to prevent abuse
+3. **Authentication** — protect all `/api/*` routes
+4. **Use Piston API** — replace local execution with the [Piston API](https://github.com/engineer-man/piston) for safer, multi-language support
+
+---
+
+## 📄 License
+
+MIT © 2026 — feel free to use, modify, and distribute.
