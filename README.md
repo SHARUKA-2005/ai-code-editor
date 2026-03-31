@@ -157,6 +157,14 @@ Health check endpoint.
 | Styling   | Custom CSS (JetBrains Mono + Syne)  |
 
 ---
+---
+### Screenshot
+<img width="1918" height="881" alt="image" src="https://github.com/user-attachments/assets/f99c88a3-98df-455b-b323-5b34f2db02b7" />
+<img width="1920" height="535" alt="image" src="https://github.com/user-attachments/assets/a964b69f-76af-44e9-8e97-8725042495c4" />
+
+
+
+---
 
 ## 🔒 Security Notes
 
