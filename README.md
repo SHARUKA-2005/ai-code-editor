@@ -1,6 +1,8 @@
 # &lt;CodeAI /&gt; — AI-Powered Code Editor
 
 A sleek, browser-based code editor with integrated AI code review powered by **Groq** and live code execution for JavaScript and Python.
+[Kindly Note: The main project is the code editor , managed and hosted by the users. If the User wishes to review using AI , they can opt for 
+Groq API which is provided to enhance the project. THE API DOES NOT CONTRIBUTE TO THE CORE FUNCTIONALITY OF THE PROJECT]
 
 ---
 
@@ -9,7 +11,7 @@ A sleek, browser-based code editor with integrated AI code review powered by **G
 - **Monaco Editor** — the same editor that powers VS Code, with syntax highlighting for 7 languages
 - **AI Code Review** — sends your code to Groq's LLM and returns intelligent feedback instantly
 - **Live Code Execution** — runs JavaScript and Python directly on the server and streams output
-- **Multi-language Support** — JavaScript, TypeScript, Python, Java, C++, Go, Rust
+- **Multi-language Support** — JavaScript, Python
 - **Tabbed Output Panel** — switch between terminal output and AI review without losing context
 
 ---
