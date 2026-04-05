@@ -6,6 +6,10 @@ A sleek, browser-based code editor with integrated AI code review powered by **G
 Groq API which is provided to enhance the project. THE API DOES NOT CONTRIBUTE TO THE CORE FUNCTIONALITY OF THE PROJECT]
 
 ---
+## Check it out LIVE here!
+
+- https://ai-code-editor-grzt.onrender.com/
+---
 
 ## ✨ Features
 
